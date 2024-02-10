@@ -34,7 +34,7 @@ export default function Header() {
               Information and Service Requests - Where Your Needs are Heard and
               Solutions Begin.
             </HeaderP>
-            <Link to="/login">
+            <Link to="/login" style={{ textAlign: "left" }}>
               <BtnWrapper>
                 <FullButton title="Get Started" />
               </BtnWrapper>
@@ -93,7 +93,6 @@ const LeftSide = styled.div`
     width: 100%;
     order: 2;
     margin: 50px 0;
-    text-align: center;
   }
   @media (max-width: 560px) {
     margin: 80px 0 50px 0;
@@ -114,7 +113,7 @@ const HeaderP = styled.div`
   line-height: 1.5rem;
   @media (max-width: 960px) {
     padding: 15px 0 50px 0;
-    text-align: center;
+
     max-width: 100%;
   }
 `;
@@ -122,6 +121,7 @@ const BtnWrapper = styled.div`
   max-width: 190px;
   @media (max-width: 960px) {
     margin: 0 auto;
+    text-align: left;
   }
 `;
 const GreyDiv = styled.div`

@@ -46,7 +46,7 @@ const ContactForm = () => {
         <div className="mb-4">
           <TextField
             fullWidth
-            size="small"
+            size="medium"
             id="fullName"
             name="fullName"
             label="Full Name"
@@ -62,7 +62,7 @@ const ContactForm = () => {
         <div className="mb-4">
           <TextField
             fullWidth
-            size="small"
+            size="medium"
             id="email"
             name="email"
             label="Email"
@@ -79,7 +79,7 @@ const ContactForm = () => {
         <div className="mb-4">
           <TextField
             fullWidth
-            size="small"
+            size="medium"
             id="title"
             name="title"
             label="Title"
@@ -95,7 +95,7 @@ const ContactForm = () => {
         <div className="mb-4">
           <TextField
             fullWidth
-            size="small"
+            size="medium"
             id="message"
             name="message"
             label="Message"
@@ -115,7 +115,7 @@ const ContactForm = () => {
             type="submit"
             variant="contained"
             color="primary"
-            size="small"
+            size="medium"
             disabled={loading}
             disableElevation
             sx={{ background: "#5e0001", fontSize: "12px" }}>

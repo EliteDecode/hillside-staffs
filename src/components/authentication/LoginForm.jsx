@@ -52,7 +52,7 @@ const LoginForm = ({ redirectFrom }) => {
       });
     }
 
-    if (user) {
+    if (user && message == "Loggedin successfully") {
       dispatch(reset());
       navigate("/dashboard");
     }
@@ -95,7 +95,7 @@ const LoginForm = ({ redirectFrom }) => {
                 noValidate
                 autoComplete="off">
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12} md={10}>
+                  <Grid item xs={12} sm={12} md={12}>
                     <div>
                       <TextField
                         label="Email Address"
@@ -120,7 +120,7 @@ const LoginForm = ({ redirectFrom }) => {
                     )}
                   </Grid>
 
-                  <Grid item xs={12} sm={12} md={10}>
+                  <Grid item xs={12} sm={12} md={12}>
                     <div>
                       <TextField
                         label="Password"
@@ -156,6 +156,7 @@ const LoginForm = ({ redirectFrom }) => {
                       textTransform: "none",
                       fontWeight: "bold",
                       marginTop: "3%",
+                      width: "100%",
                     }}
                     className="bg-[#5e0001]"
                     size="medium"
@@ -171,6 +172,7 @@ const LoginForm = ({ redirectFrom }) => {
                       textTransform: "none",
                       fontWeight: "bold",
                       marginTop: "3%",
+                      width: "100%",
                     }}
                     className="bg-[#5e0001]"
                     size="medium"

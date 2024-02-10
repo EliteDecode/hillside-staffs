@@ -18,7 +18,7 @@ const IdcardApplication = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.data?.IdCardStatus == 1) {
+    if (user?.data?.IdCardStatus == 1 && user?.data?.Approved == 0) {
       navigate("/dashboard");
     }
   }, []);

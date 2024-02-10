@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useFormik } from "formik";
 import {
   TextField,
@@ -18,11 +18,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { reset, update } from "../../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import html2canvas from "html2canvas";
+import JsPDF from "jspdf";
+import domtoimage from "dom-to-image";
 const validationSchema = Yup.object().shape({
   phonenumber: Yup.string().required("Phone Number is required"),
-  other: Yup.string().required("Other is required"),
   rolename: Yup.string().required("Role Name is required"),
+  bloodGroup: Yup.string().required("Blood group is required"),
   sex: Yup.string().required("Sex is required"),
+  year: Yup.string().required("Year is required"),
+  position: Yup.string().required("Current position is required"),
   profilePicture: Yup.mixed().required("Profile Picture is required"),
 });
 
@@ -34,6 +39,48 @@ const IDForm = () => {
     (state) => state.auth
   );
 
+  const qrCode = `https://online.hust.edu.ng/OESWebApp/images/code/${user?.data?.qrcode}`;
+  const img = `https://backend.hust.edu.ng/hust/api/v1/uploads/staffProfile/${user?.data?.profilePicture}`;
+
+  console.log(img);
+
+  const [loader, setLoader] = useState(false);
+
+  const pdfRef = useRef();
+
+  const downloadPDF = () => {
+    const node = pdfRef.current;
+
+    var options = {
+      quality: 0.99,
+      width: 700,
+      height: 700,
+    };
+
+    domtoimage.toPng(node, options).then(function (imgData) {
+      const pdf = new JsPDF("p", "mm", "a4", true);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      // Create a temporary image element to get its dimensions
+      const tempImg = new Image();
+      tempImg.src = imgData;
+      tempImg.onload = function () {
+        const imgWidth = tempImg.width;
+        const imgHeight = tempImg.height;
+
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const newImgWidth = imgWidth * ratio;
+        const newImgHeight = imgHeight * ratio;
+        const imgX = (pdfWidth - newImgWidth) / 2;
+        const imgY = (pdfHeight - newImgHeight) / 2;
+
+        pdf.addImage(imgData, "JPEG", imgX, imgY, newImgWidth, newImgHeight);
+        pdf.save("id.pdf");
+      };
+    });
+  };
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -42,6 +89,9 @@ const IDForm = () => {
     other: "",
     rolename: "",
     sex: "",
+    year: "",
+    position: "",
+    bloodGroup: "",
     profilePicture: null,
   };
 
@@ -53,42 +103,20 @@ const IDForm = () => {
 
     const updates = [
       { columnName: "phone", newValue: values.phonenumber },
-      { columnName: "programs", newValue: values.other },
+      { columnName: "programs", newValue: "BSC" },
+      { columnName: "bloodGroup", newValue: values.bloodGroup },
+      { columnName: "currentPosition", newValue: values.position },
       { columnName: "sex", newValue: values.sex },
+      { columnName: "year", newValue: values.year },
       { columnName: "rolename", newValue: values.rolename },
       { columnName: "IdCardStatus", newValue: 1 },
+      { columnName: "staffId", newValue: "Not Set" },
     ].filter((update) => update.newValue !== "");
 
     formData.append("updates", JSON.stringify(updates));
 
-    const oesFormData = new FormData();
-    const userData = user?.data;
-
-    oesFormData.append("firstname", userData?.firstname);
-    oesFormData.append("lastname", userData?.lastname);
-    oesFormData.append("username", userData?.username);
-    oesFormData.append("email", userData?.email);
-    oesFormData.append("schoolacro", "HUST");
-    oesFormData.append("description", "HUST schools");
-    oesFormData.append("phoneNumber", values.phonenumber);
-    oesFormData.append("sex", values.sex);
-    oesFormData.append("rolename", values.rolename);
-    oesFormData.append("other", values.other);
-    oesFormData.append("schoolClass", "Level 1");
-    oesFormData.append("password", userData?.unHashedPassword);
-    oesFormData.append("passwordAgain", userData?.unHashedPassword);
-    oesFormData.append("channel", "OES-HUST2024");
-    oesFormData.append("schoolname", "HUST");
-
     try {
-      const response = await axios.post(
-        "https://online.hust.edu.ng/OESWebApp/addstafftolms.do",
-        oesFormData
-      );
-
-      if (response) {
-        dispatch(update(formData));
-      }
+      dispatch(update(formData));
     } catch (error) {
       toast.error(error);
     }
@@ -131,6 +159,10 @@ const IDForm = () => {
       value: user?.data?.lastname,
     },
     {
+      title: "Blood Group",
+      value: formik.values.bloodGroup,
+    },
+    {
       title: "Username",
       value: user?.data?.username,
     },
@@ -151,291 +183,732 @@ const IDForm = () => {
       value: formik?.values?.rolename,
     },
     {
-      title: "Program or Discipline",
-      value: formik?.values?.other,
+      title: "Current Position",
+      value: formik.values.position,
     },
   ];
 
   return (
     <>
       <Box className="mt-3 sm:mb-48 mb-48">
-        <Card>
-          <Card.Header> Staff Access ID Card Applications</Card.Header>
-          <Card.Body>
-            <Card.Title className="font-bold text-[#5e0001]">
-              Fill out the form to request your staff access ID card.
-            </Card.Title>
-            {!confirm ? (
-              <Card.Text className="text-[12px]">
-                <form onSubmit={formik.handleSubmit} className=" mx-auto mt-8">
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth size="small" variant="outlined">
-                        <InputLabel htmlFor="rolename">Role Name</InputLabel>
-                        <Select
-                          label="Role Name"
-                          name="rolename"
-                          id="rolename"
-                          value={formik.values.rolename}
-                          onBlur={formik.handleBlur}
-                          onChange={formik.handleChange}>
-                          <MenuItem value="HR">HR</MenuItem>
-                          <MenuItem value="Lecturer">Lecturer</MenuItem>
-                        </Select>
-                      </FormControl>
-                      {formik.errors.rolename && formik.touched.rolename && (
-                        <Typography
-                          sx={{
-                            fontSize: "11px",
-                            color: "red",
-                            textAlign: "left",
-                          }}>
-                          {formik.errors.rolename}
-                        </Typography>
-                      )}
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth size="small" variant="outlined">
-                        <InputLabel htmlFor="sex">Sex</InputLabel>
-                        <Select
-                          label="Sex"
-                          name="sex"
-                          id="sex"
-                          value={formik.values.sex}
-                          onBlur={formik.handleBlur}
-                          onChange={formik.handleChange}>
-                          <MenuItem value="Male">Male</MenuItem>
-                          <MenuItem value="Female">Female</MenuItem>
-                          <MenuItem value="Other">Other</MenuItem>
-                        </Select>
-                      </FormControl>
-                      {formik.errors.sex && formik.touched.sex && (
-                        <Typography
-                          sx={{
-                            fontSize: "11px",
-                            color: "red",
-                            textAlign: "left",
-                          }}>
-                          {formik.errors.sex}
-                        </Typography>
-                      )}
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        label="Phone Number"
-                        name="phonenumber"
-                        fullWidth
-                        size="small"
-                        variant="outlined"
-                        value={formik.values.phonenumber}
-                        onBlur={formik.handleBlur}
-                        onChange={formik.handleChange}
-                      />
-                      {formik.errors.phonenumber &&
-                        formik.touched.phonenumber && (
+        {user?.data?.Approved == 0 ? (
+          <Card>
+            <Card.Header> Staff Access ID Card Applications</Card.Header>
+            <Card.Body>
+              <Card.Title className="font-bold text-[#5e0001]">
+                Fill out the form to request your staff access ID card.
+              </Card.Title>
+              {!confirm ? (
+                <Card.Text className="text-[12px]">
+                  <form
+                    onSubmit={formik.handleSubmit}
+                    className=" mx-auto mt-8">
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth size="medium" variant="outlined">
+                          <InputLabel htmlFor="rolename">Role</InputLabel>
+                          <Select
+                            label="Role"
+                            name="rolename"
+                            id="rolename"
+                            value={formik.values.rolename}
+                            onBlur={formik.handleBlur}
+                            onChange={formik.handleChange}>
+                            <MenuItem value="HR">Non-Academic Staff</MenuItem>
+                            <MenuItem value="Lecturer">Academic Staff</MenuItem>
+                          </Select>
+                        </FormControl>
+                        {formik.errors.rolename && formik.touched.rolename && (
                           <Typography
                             sx={{
                               fontSize: "11px",
                               color: "red",
                               textAlign: "left",
                             }}>
-                            {formik.errors.phonenumber}
+                            {formik.errors.rolename}
                           </Typography>
                         )}
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        label="Programs"
-                        name="other"
-                        fullWidth
-                        size="small"
-                        variant="outlined"
-                        value={formik.values.other}
-                        onBlur={formik.handleBlur}
-                        onChange={formik.handleChange}
-                      />
-                      {formik.errors.other && formik.touched.other && (
-                        <Typography
-                          sx={{
-                            fontSize: "11px",
-                            color: "red",
-                            textAlign: "left",
-                          }}>
-                          {formik.errors.other}
-                        </Typography>
-                      )}
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <input
-                        accept="image/*"
-                        style={{ display: "none" }}
-                        id="profilePicture"
-                        name="profilePicture"
-                        type="file"
-                        onChange={(event) => {
-                          formik.setFieldValue(
-                            "profilePicture",
-                            event.currentTarget.files[0]
-                          );
-                          // Display the chosen picture beneath the form
-                          setProfile(
-                            URL.createObjectURL(event.currentTarget.files[0])
-                          );
-                        }}
-                      />
-                      <label htmlFor="profilePicture">
-                        <Button
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Current Position"
+                          name="position"
+                          fullWidth
+                          size="medium"
+                          placeholder="e.g. Lecturer 1"
                           variant="outlined"
-                          color="primary"
-                          component="span"
-                          className="mt-2">
-                          Upload Profile Picture
-                        </Button>
-                      </label>
-                      {formik.errors.profilePicture &&
-                        formik.touched.profilePicture && (
+                          value={formik.values.position}
+                          onBlur={formik.handleBlur}
+                          onChange={formik.handleChange}
+                        />
+                        {formik.errors.position && formik.touched.position && (
                           <Typography
                             sx={{
                               fontSize: "11px",
                               color: "red",
                               textAlign: "left",
                             }}>
-                            {formik.errors.profilePicture}
+                            {formik.errors.position}
                           </Typography>
                         )}
-                    </Grid>
+                      </Grid>
 
-                    {/* Display the chosen picture */}
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth size="medium" variant="outlined">
+                          <InputLabel htmlFor="sex">Sex</InputLabel>
+                          <Select
+                            label="Sex"
+                            name="sex"
+                            id="sex"
+                            value={formik.values.sex}
+                            onBlur={formik.handleBlur}
+                            onChange={formik.handleChange}>
+                            <MenuItem value="Male">Male</MenuItem>
+                            <MenuItem value="Female">Female</MenuItem>
+                          </Select>
+                        </FormControl>
+                        {formik.errors.sex && formik.touched.sex && (
+                          <Typography
+                            sx={{
+                              fontSize: "11px",
+                              color: "red",
+                              textAlign: "left",
+                            }}>
+                            {formik.errors.sex}
+                          </Typography>
+                        )}
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <FormControl fullWidth size="medium" variant="outlined">
+                          <InputLabel htmlFor="bloodGroup">
+                            Blood Group
+                          </InputLabel>
+                          <Select
+                            label="Blood Group"
+                            name="bloodGroup"
+                            id="bloodGroup"
+                            value={formik.values.bloodGroup}
+                            onBlur={formik.handleBlur}
+                            onChange={formik.handleChange}>
+                            <MenuItem value="A+">A+</MenuItem>
+                            <MenuItem value="A-">A-</MenuItem>
+                            <MenuItem value="B+">B+</MenuItem>
+                            <MenuItem value="B-">B-</MenuItem>
+                            <MenuItem value="AB+">AB+</MenuItem>
+                            <MenuItem value="AB-">AB-</MenuItem>
+                            <MenuItem value="O+">O+</MenuItem>
+                            <MenuItem value="O-">O-</MenuItem>
+                          </Select>
+                        </FormControl>
+                        {formik.errors.bloodGroup &&
+                          formik.touched.bloodGroup && (
+                            <Typography
+                              sx={{
+                                fontSize: "11px",
+                                color: "red",
+                                textAlign: "left",
+                              }}>
+                              {formik.errors.bloodGroup}
+                            </Typography>
+                          )}
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Phone Number"
+                          name="phonenumber"
+                          fullWidth
+                          size="medium"
+                          focused
+                          variant="outlined"
+                          value={formik.values.phonenumber}
+                          onBlur={formik.handleBlur}
+                          onChange={formik.handleChange}
+                        />
+                        {formik.errors.phonenumber &&
+                          formik.touched.phonenumber && (
+                            <Typography
+                              sx={{
+                                fontSize: "11px",
+                                color: "red",
+                                textAlign: "left",
+                              }}>
+                              {formik.errors.phonenumber}
+                            </Typography>
+                          )}
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Year of Resumption"
+                          name="year"
+                          fullWidth
+                          size="medium"
+                          focused
+                          type="date"
+                          variant="outlined"
+                          value={formik.values.year}
+                          onBlur={formik.handleBlur}
+                          onChange={formik.handleChange}
+                        />
+                        {formik.errors.year && formik.touched.year && (
+                          <Typography
+                            sx={{
+                              fontSize: "11px",
+                              color: "red",
+                              textAlign: "left",
+                            }}>
+                            {formik.errors.year}
+                          </Typography>
+                        )}
+                      </Grid>
 
-                    <Grid item xs={12}>
-                      <img
-                        id="imgPreview"
-                        src={profile}
-                        alt="Profile Preview"
-                        hidden={formik.values.profilePicture ? false : true}
-                        style={{ marginTop: "10px", maxHeight: "200px" }}
-                      />
-                    </Grid>
+                      <Grid item xs={6}>
+                        <input
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          id="profilePicture"
+                          name="profilePicture"
+                          type="file"
+                          onChange={(event) => {
+                            formik.setFieldValue(
+                              "profilePicture",
+                              event.currentTarget.files[0]
+                            );
+                            // Display the chosen picture beneath the form
+                            setProfile(
+                              URL.createObjectURL(event.currentTarget.files[0])
+                            );
+                          }}
+                        />
+                        <label htmlFor="profilePicture">
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            component="span"
+                            className="mt-2">
+                            Upload Profile Picture
+                          </Button>
+                        </label>
+                        {formik.errors.profilePicture &&
+                          formik.touched.profilePicture && (
+                            <Typography
+                              sx={{
+                                fontSize: "11px",
+                                color: "red",
+                                textAlign: "left",
+                              }}>
+                              {formik.errors.profilePicture}
+                            </Typography>
+                          )}
+                      </Grid>
 
-                    <Grid item xs={12}>
-                      {formik.values.other &&
-                        formik.values.phonenumber &&
+                      {/* Display the chosen picture */}
+
+                      {formik.values.phonenumber &&
                         formik.values.profilePicture &&
                         formik.values.rolename &&
-                        formik.values.sex && (
+                        formik.values.sex &&
+                        formik.values.year && (
+                          <>
+                            <Grid item xs={12} md={12}>
+                              <Button
+                                onClick={() => setConfirm(!confirm)}
+                                variant="contained"
+                                color="primary"
+                                className="mt-4"
+                                size="medium"
+                                disableElevation
+                                sx={{ fontSize: "12px" }}>
+                                Next
+                              </Button>
+                            </Grid>
+                          </>
+                        )}
+                    </Grid>
+                  </form>
+                </Card.Text>
+              ) : (
+                <Card.Text className="text-[12px]">
+                  <Typography sx={{ opacity: 0.7 }}>
+                    {" "}
+                    Please Confirm your Staff ID Card Information
+                  </Typography>
+                  <Grid container spacing={2} className="mt-2">
+                    {IdCardDetails.map((item) => {
+                      return (
+                        <Grid item xs={12} md={6}>
+                          <Typography
+                            sx={{
+                              fontSize: "12px",
+                              background: "#f2f2f2",
+                              padding: "8px 12px",
+                              borderRadius: "5px",
+                              margin: "0px 0px",
+                              "@media (min-width: 0px) and (max-width: 575px)":
+                                {
+                                  fontSize: "15px",
+                                  padding: "13px 12px",
+                                },
+                            }}>
+                            {item.title}: {item.value}
+                          </Typography>
+                        </Grid>
+                      );
+                    })}
+
+                    <Grid item xs={12} className="space-x-4">
+                      {loading ? (
+                        <>
+                          <Button
+                            disabled
+                            variant="contained"
+                            color="warning"
+                            className="mt-4"
+                            size="medium"
+                            disableElevation
+                            sx={{ fontSize: "12px" }}>
+                            Prev
+                          </Button>
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            disabled
+                            color="primary"
+                            className="mt-4"
+                            size="medium"
+                            disableElevation
+                            sx={{ fontSize: "12px" }}>
+                            Please wait...
+                          </Button>
+                        </>
+                      ) : (
+                        <>
                           <Button
                             onClick={() => setConfirm(!confirm)}
                             variant="contained"
-                            color="primary"
+                            color="warning"
                             className="mt-4"
-                            size="small"
+                            size="medium"
                             disableElevation
                             sx={{ fontSize: "12px" }}>
-                            Next
+                            Prev
                           </Button>
-                        )}
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            onClick={formik.handleSubmit}
+                            color="primary"
+                            className="mt-4"
+                            size="medium"
+                            disableElevation
+                            sx={{ fontSize: "12px" }}>
+                            Submit
+                          </Button>
+                        </>
+                      )}
+                    </Grid>
+
+                    <Grid
+                      item
+                      xs={12}
+                      className="flex items-center justify-center bg-white">
+                      <div ref={pdfRef}>
+                        <div className="flex items-center space-x-2 justify-center">
+                          <div className="flex items-center justify-center relative">
+                            <div className="h-[450px] w-[270px] border">
+                              {/* Header */}
+                              <div className="absolute h-[450px] w-[270px] top-[100px]">
+                                <img
+                                  src={require("../../assets/img/faintLogo.png")}
+                                  alt=""
+                                />
+                              </div>
+                              <div className="pt-[12px] pb-[5px] px-[15px] bg-[#5e0001] flex items-center space-x-4">
+                                <div className="bg-white w-[20%] p-1 ">
+                                  <img
+                                    src={require("../../assets/img/logo.png")}
+                                  />
+                                </div>
+                                <div className=" w-[80%] ">
+                                  <h3 className="text-[13px] text-white font-semibold ">
+                                    HILLSIDE UNIVERSITY <br /> OF SCIENCE &
+                                    TECHNOLOGY <br />
+                                    <span className="font-normal text-[10px]">
+                                      Oke-Mesi, Ekiti, Nigeria.
+                                    </span>
+                                  </h3>
+                                </div>
+                              </div>
+                              {/* End of Header */}
+
+                              <div className="flex  items-center justify-between">
+                                <div className="p-3">
+                                  <img
+                                    src={profile}
+                                    className="h-[120px] w-[110px]"
+                                    style={{
+                                      border: "2px solid #5e0001",
+                                    }}
+                                  />
+                                </div>
+
+                                <div className="mt-5">
+                                  <div className="">
+                                    <h3 className="text-[13px] text-white bg-[#5e0002c1] border px-[20px] pt-2 pb-1 font-[600]  ">
+                                      STAFF
+                                    </h3>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <div className="p-3 -mt-12 ">
+                                  <div className="flex items-center space-x-4">
+                                    <div>
+                                      <h5 className=" text-[12px] text-[#5e0001]">
+                                        SURNAME
+                                      </h5>
+                                      <h6 className="-mt-2 font-semibold text-[14px]">
+                                        {user?.data?.lastname}{" "}
+                                      </h6>
+                                    </div>
+                                    <div className="">
+                                      <h5 className=" text-[12px] text-[#5e0001]">
+                                        OTHER NAMES
+                                      </h5>
+                                      <h6 className="-mt-2 font-semibold text-[14px]">
+                                        {user?.data?.firstname}{" "}
+                                      </h6>
+                                    </div>
+                                  </div>
+                                  <div className="mt-1">
+                                    <h5 className=" text-[12px] text-[#5e0001]">
+                                      ID NUMBER
+                                    </h5>
+                                    <h6 className="-mt-2 font-semibold text-[14px]">
+                                      HUST-xxxx/xxxx
+                                    </h6>
+                                  </div>
+                                  <div className="mt-1">
+                                    <h5 className=" text-[12px] text-[#5e0001]">
+                                      ISSUED DATE
+                                    </h5>
+                                    <h6 className="-mt-2 font-semibold text-[14px]">
+                                      xx/xx/xxxx
+                                    </h6>
+                                  </div>
+                                  <div className="mt-1">
+                                    <h5 className=" text-[12px] text-[#5e0001]">
+                                      Blood Group
+                                    </h5>
+                                    <h6 className="-mt-2 font-semibold text-[14px]">
+                                      {formik.values.bloodGroup}
+                                    </h6>
+                                  </div>
+                                  <div className="mt-1 absolute -bottom-2">
+                                    <h6 className=" underline font-semibold text-[14px]">
+                                      Hgbuo
+                                    </h6>
+                                    <h5 className="-mt-2 text-[12px] text-[#5e0001]">
+                                      Staff Signature
+                                    </h5>
+                                  </div>
+                                </div>
+                                <div className="relative bg-[#5e0002c1]    h-[225px] w-[40px]">
+                                  <span className="rotate font-bold text-white">
+                                    {formik.values.position}
+                                  </span>
+                                  <img
+                                    src={require("../../assets/img/leaf.png")}
+                                    alt=""
+                                    className="absolute bottom-0 right-10 "
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Back of card */}
+
+                          <div className="flex items-center justify-center mt-2 relative">
+                            <div className="h-[450px] w-[270px] border p-3">
+                              {/* Header */}
+                              <div className="absolute h-[450px] w-[270px] top-[100px]">
+                                <img
+                                  src={require("../../assets/img/faintLogo.png")}
+                                  alt=""
+                                />
+                              </div>
+
+                              <div>
+                                <h3 className="text-[12px] font-semibold">
+                                  This card is the property of
+                                </h3>
+                                <h3 className="text-[17px] text-[#5e0001] font-bold ">
+                                  HILLSIDE UNIVERSITY <br /> OF SCIENCE &
+                                  TECHNOLOGY <br />
+                                  <span className="font-semibold text-gray-900 text-[15px]">
+                                    Oke-Mesi, Ekiti, Nigeria.
+                                  </span>
+                                </h3>
+                                <h3 className="text-[12px] font-semibold">
+                                  If found, please return to the above
+                                  institution.
+                                </h3>
+                                <h3 className="text-[12px] font-semibold">
+                                  Visit us at www.hust.edu.ng
+                                </h3>
+                              </div>
+                              <div className="mt-3">
+                                <h3 className="text-[15px] font-semibold">
+                                  Disruptive Innovation Capacity Building in:
+                                </h3>
+
+                                <p className="font-semibold text-[13px] ">
+                                  <span className="font-black text-black">
+                                    S
+                                  </span>
+                                  ciences/Security
+                                </p>
+                                <p className="font-semibold text-[13px] -mt-4">
+                                  <span className="text-[#5e0001] font-black">
+                                    T
+                                  </span>
+                                  echnology/Engineering
+                                </p>
+                                <p className="font-semibold text-[13px] -mt-4">
+                                  <span className="font-black text-[#75a2d6]">
+                                    E
+                                  </span>
+                                  ducation/Environment
+                                </p>
+                                <p className="font-semibold text-[13px] -mt-4">
+                                  <span className="font-black text-[#677e56]">
+                                    A
+                                  </span>
+                                  gribusiness/Vocational
+                                </p>
+                                <p className="font-semibold text-[13px] -mt-4">
+                                  <span className="font-black text-[#c1203b]">
+                                    M
+                                  </span>
+                                  edicine/Management
+                                </p>
+                              </div>
+
+                              <div className="flex justify-between items-center w-[100%] -mt-3">
+                                <div></div>
+                                <div className="border p-2 bg-[#5e0001] w-[38%] rounded-md">
+                                  <img
+                                    src={require("../../assets/img/qrcode.png")}
+                                    alt=""
+                                    className="w-[100%]"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="mt-2 absolute bottom-1">
+                                <h6 className="underline font-semibold text-[14px]">
+                                  Hgbuo
+                                </h6>
+                                <h5 className="-mt-2 text-[12px] text-[#5e0001]">
+                                  President/Vice Chancellor
+                                </h5>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </Grid>
                   </Grid>
-                </form>
-              </Card.Text>
-            ) : (
-              <Card.Text className="text-[12px]">
-                <Typography sx={{ opacity: 0.7 }}>
-                  {" "}
-                  Please Confirm your Staff ID Card Information
-                </Typography>
-                <Grid container spacing={2} className="mt-2">
-                  {IdCardDetails.map((item) => {
-                    return (
-                      <Grid item xs={12} md={6}>
-                        <Typography
-                          sx={{
-                            fontSize: "12px",
-                            background: "#f2f2f2",
-                            padding: "8px 12px",
-                            borderRadius: "5px",
-                            margin: "0px 0px",
-                            "@media (min-width: 0px) and (max-width: 575px)": {
-                              fontSize: "15px",
-                              padding: "13px 12px",
-                            },
-                          }}>
-                          {item.title}: {item.value}
-                        </Typography>
+                </Card.Text>
+              )}
+            </Card.Body>
+          </Card>
+        ) : (
+          <Card>
+            <Card.Header></Card.Header>
+            <Card.Body>
+              <Grid container>
+                <Grid item sm={12} md={12} className=""></Grid>
+                <Grid item sm={12} md={12} className="bg-white">
+                  <div
+                    id="idpdf"
+                    ref={pdfRef}
+                    className="bg-white flex items-center justify-center mb-4">
+                    <div className=" space-x-4">
+                      <Grid container spacing={2}>
+                        <Grid item sm={12} md={6} className="bg-white">
+                          <div className="idcard border">
+                            <div className="faintLogo">
+                              <img
+                                src={require("../../assets/img/faintLogo.png")}
+                                alt=""
+                              />
+                            </div>
+                            <div className="front">
+                              <div className="header">
+                                <div className="logo">
+                                  <img
+                                    src={require("../../assets/img/logo.png")}
+                                    alt=""
+                                  />
+                                </div>
+                                <div className="text">
+                                  <h1>
+                                    HILLSIDE UNIVERSITY OF SCIENCE & TECHNOLOGY
+                                  </h1>
+                                  <h6>Oke-Mesi, Ekiti, Nigeria.</h6>
+                                </div>
+                              </div>
+                              <div className="middle">
+                                <div className="img">
+                                  <img src={img} alt="" />
+                                </div>
+                                <div className="staff">
+                                  <p>STAFF</p>
+                                </div>
+                              </div>
+                              <div className="details">
+                                <div className="right-details -mt-5">
+                                  <div className="names surname ">
+                                    <h5>SURNAME</h5>
+                                    <h6>{user?.data?.lastname}</h6>
+                                  </div>
+                                  <div className="names">
+                                    <h5>OTHER NAMES</h5>
+                                    <h6>{user?.data?.firstname}</h6>
+                                  </div>
+
+                                  <div className="namess">
+                                    <h5>ID NUMBER</h5>
+                                    <h6>{user?.data?.staffId}</h6>
+                                  </div>
+                                  <div className="namess">
+                                    <h5>ISSUED DATE</h5>
+                                    <h6> {user?.data?.createdAt}</h6>
+                                  </div>
+                                  <div className="namess">
+                                    <h5>BLOOD GROUP</h5>
+                                    <h6> {user?.data?.bloodGroup}</h6>
+                                  </div>
+                                  <div className="sign">
+                                    <h6>.......................</h6>
+                                    <h5>Staff Signature</h5>
+                                  </div>
+                                </div>
+                                <div className="left-details">
+                                  <span className="rotate">
+                                    {user?.data?.currentPosition.toUpperCase()}
+                                  </span>
+                                  <img
+                                    src={require("../../assets/img/leaf.png")}
+                                    alt=""
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Grid>
+                        {/* Back of card */}
+                        <Grid item sm={12} md={6} className="bg-white">
+                          <div className="flex items-center justify-center relative">
+                            <div className="h-[470px] w-[280px] border p-3">
+                              {/* Header */}
+                              <div className="absolute h-[450px] w-[270px] top-[100px]">
+                                <img
+                                  src={require("../../assets/img/faintLogo.png")}
+                                  alt=""
+                                />
+                              </div>
+
+                              <div>
+                                <h3 className="text-[12px] font-semibold">
+                                  This card is the property of
+                                </h3>
+                                <h3 className="text-[15px] text-[#5e0001] font-bold ">
+                                  HILLSIDE UNIVERSITY <br /> OF SCIENCE &
+                                  TECHNOLOGY <br />
+                                  <span className="font-semibold text-gray-900 text-[15px]">
+                                    Oke-Mesi, Ekiti, Nigeria.
+                                  </span>
+                                </h3>
+                                <h3 className="text-[12px]  font-semibold">
+                                  If found, please return to the above
+                                  institution.
+                                </h3>
+                                <h3 className="text-[12px] font-semibold ">
+                                  Visit us at www.hust.edu.ng
+                                </h3>
+                              </div>
+                              <div className="">
+                                <h3 className="text-[12px] font-bold mt-4">
+                                  Disruptive Innovation Capacity Building in:
+                                </h3>
+
+                                <p className="font-semibold text-[13px] -mt-2 ">
+                                  <span className="font-black text-black">
+                                    S
+                                  </span>
+                                  ciences/Security
+                                </p>
+                                <p className="font-semibold text-[13px] -mt-4 ">
+                                  <span className="text-[#5e0001] font-black">
+                                    T
+                                  </span>
+                                  echnology/Engineering
+                                </p>
+                                <p className="font-semibold text-[13px] -mt-4 ">
+                                  <span className="font-black text-[#75a2d6]">
+                                    E
+                                  </span>
+                                  ducation/Environment
+                                </p>
+                                <p className="font-semibold text-[13px] -mt-4 ">
+                                  <span className="font-black text-[#677e56]">
+                                    A
+                                  </span>
+                                  gribusiness/Vocational
+                                </p>
+                                <p className="font-semibold text-[13px] -mt-4 ">
+                                  <span className="font-black text-[#c1203b]">
+                                    M
+                                  </span>
+                                  edicine/Management
+                                </p>
+                              </div>
+
+                              <div className="flex justify-between items-center w-[100%] mt-2">
+                                <div></div>
+                                <div className="border p-2 bg-[#5e0001] w-[45%] rounded-md">
+                                  <img
+                                    src={qrCode}
+                                    alt=""
+                                    className="w-[100%]"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="sign2">
+                                <h6>.......................</h6>
+                                <h5>President/Vice-Chancellor</h5>
+                              </div>
+                            </div>
+                          </div>
+                        </Grid>
                       </Grid>
-                    );
-                  })}
-
-                  <Grid item xs={12}>
-                    <img
-                      id="imgPreview"
-                      src={profile}
-                      alt="Profile Preview"
-                      hidden={formik.values.profilePicture ? false : true}
-                      style={{ marginTop: "10px", maxHeight: "200px" }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} className="space-x-4">
-                    {loading ? (
-                      <>
-                        <Button
-                          disabled
-                          variant="contained"
-                          color="warning"
-                          className="mt-4"
-                          size="small"
-                          disableElevation
-                          sx={{ fontSize: "12px" }}>
-                          Prev
-                        </Button>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          disabled
-                          color="primary"
-                          className="mt-4"
-                          size="small"
-                          disableElevation
-                          sx={{ fontSize: "12px" }}>
-                          Please wait...
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          onClick={() => setConfirm(!confirm)}
-                          variant="contained"
-                          color="warning"
-                          className="mt-4"
-                          size="small"
-                          disableElevation
-                          sx={{ fontSize: "12px" }}>
-                          Prev
-                        </Button>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          onClick={formik.handleSubmit}
-                          color="primary"
-                          className="mt-4"
-                          size="small"
-                          disableElevation
-                          sx={{ fontSize: "12px" }}>
-                          Submit
-                        </Button>
-                      </>
-                    )}
-                  </Grid>
+                    </div>
+                  </div>
                 </Grid>
-              </Card.Text>
-            )}
-          </Card.Body>
-        </Card>
+              </Grid>
+            </Card.Body>
+            <Card.Footer>
+              <button
+                className="py-2 px-6 bg-[#5e0001] text-white rounded-md"
+                onClick={downloadPDF}>
+                {loader ? "Please wait" : "Download ID Card"}
+              </button>
+            </Card.Footer>
+          </Card>
+        )}
       </Box>
     </>
   );

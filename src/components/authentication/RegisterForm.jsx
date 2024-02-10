@@ -107,7 +107,7 @@ const RegisterForm = ({ redirectFrom }) => {
                 noValidate
                 autoComplete="off">
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12} md={5}>
+                  <Grid item xs={12} sm={12} md={6}>
                     <div>
                       <TextField
                         label="First Name"
@@ -120,12 +120,17 @@ const RegisterForm = ({ redirectFrom }) => {
                       />
                     </div>
                     {errors.firstname && touched.firstname && (
-                      <Typography sx={{ fontSize: "11px", color: "red" }}>
+                      <Typography
+                        sx={{
+                          fontSize: "11px",
+                          color: "red",
+                          textAlign: "left",
+                        }}>
                         {errors.firstname}
                       </Typography>
                     )}
                   </Grid>
-                  <Grid item xs={12} sm={12} md={5}>
+                  <Grid item xs={12} sm={12} md={6}>
                     <div>
                       <TextField
                         label="Last Name or Surname"
@@ -138,12 +143,17 @@ const RegisterForm = ({ redirectFrom }) => {
                       />
                     </div>
                     {errors.lastname && touched.lastname && (
-                      <Typography sx={{ fontSize: "11px", color: "red" }}>
+                      <Typography
+                        sx={{
+                          fontSize: "11px",
+                          color: "red",
+                          textAlign: "left",
+                        }}>
                         {errors.lastname}
                       </Typography>
                     )}
                   </Grid>
-                  <Grid item xs={12} sm={12} md={5}>
+                  <Grid item xs={12} sm={12} md={6}>
                     <div>
                       <TextField
                         label="Username"
@@ -156,12 +166,17 @@ const RegisterForm = ({ redirectFrom }) => {
                       />
                     </div>
                     {errors.username && touched.username && (
-                      <Typography sx={{ fontSize: "11px", color: "red" }}>
+                      <Typography
+                        sx={{
+                          fontSize: "11px",
+                          color: "red",
+                          textAlign: "left",
+                        }}>
                         {errors.username}
                       </Typography>
                     )}
                   </Grid>
-                  <Grid item xs={12} sm={12} md={5}>
+                  <Grid item xs={12} sm={12} md={6}>
                     <div>
                       <TextField
                         label="Email Address"
@@ -174,13 +189,18 @@ const RegisterForm = ({ redirectFrom }) => {
                       />
                     </div>
                     {errors.email && touched.email && (
-                      <Typography sx={{ fontSize: "11px", color: "red" }}>
+                      <Typography
+                        sx={{
+                          fontSize: "11px",
+                          color: "red",
+                          textAlign: "left",
+                        }}>
                         {errors.email}
                       </Typography>
                     )}
                   </Grid>
 
-                  <Grid item xs={12} sm={12} md={5}>
+                  <Grid item xs={12} sm={12} md={6}>
                     <div>
                       <TextField
                         label="Password"
@@ -194,12 +214,17 @@ const RegisterForm = ({ redirectFrom }) => {
                       />
                     </div>
                     {errors.password && touched.password && (
-                      <Typography sx={{ fontSize: "11px", color: "red" }}>
+                      <Typography
+                        sx={{
+                          fontSize: "11px",
+                          color: "red",
+                          textAlign: "left",
+                        }}>
                         {errors.password}
                       </Typography>
                     )}
                   </Grid>
-                  <Grid item xs={12} sm={12} md={5}>
+                  <Grid item xs={12} sm={12} md={6}>
                     <div>
                       <TextField
                         label="Retype Password"
@@ -213,7 +238,12 @@ const RegisterForm = ({ redirectFrom }) => {
                       />
                     </div>
                     {errors.confirmPassword && touched.confirmPassword && (
-                      <Typography sx={{ fontSize: "11px", color: "red" }}>
+                      <Typography
+                        sx={{
+                          fontSize: "11px",
+                          color: "red",
+                          textAlign: "left",
+                        }}>
                         {errors.confirmPassword}
                       </Typography>
                     )}
@@ -228,6 +258,7 @@ const RegisterForm = ({ redirectFrom }) => {
                       textTransform: "none",
                       fontWeight: "bold",
                       marginTop: "3%",
+                      width: "100%",
                     }}
                     className="bg-blue-700"
                     size="medium"
@@ -243,6 +274,7 @@ const RegisterForm = ({ redirectFrom }) => {
                       textTransform: "none",
                       fontWeight: "bold",
                       marginTop: "3%",
+                      width: "100%",
                     }}
                     className="bg-blue-700"
                     size="medium"

@@ -27,6 +27,7 @@ export default function TopNavbar({ path }) {
   return (
     <>
       <Sidebar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+
       {sidebarOpen && <Backdrop toggleSidebar={toggleSidebar} />}
       <Wrapper
         className="flexCenter animate whiteBg"
@@ -210,14 +211,12 @@ const NavInner = styled.div`
 const BurderWrapper = styled.button`
   outline: none;
   border: 0px;
-
   background-color: transparent;
   height: 100%;
   padding: 0 15px;
   display: none;
   @media (max-width: 760px) {
     display: block;
-    margin-top: -10px;
   }
 `;
 const UlWrapper = styled.ul`

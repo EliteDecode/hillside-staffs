@@ -19,40 +19,42 @@ export default function Login() {
           <LeftSide2 className="flexCenter">
             <LoginForm />
           </LeftSide2>
-          <RightSide2>
-            <ImageWrapper>
-              <Img
-                className="radius8"
-                src={HeaderImage}
-                alt="office"
-                style={{ zIndex: 9, width: "70%" }}
-              />
-              <QuoteWrapper className="flexCenter darkBg radius8">
-                <QuotesWrapper>
-                  <QuotesIcon />
-                </QuotesWrapper>
-                <div>
-                  <p className="font15 whiteColor">
-                    <em>
-                      To be a prestigious international university that
-                      champions innovation, self -reliance, and the development
-                      of culturally savvy and disciplined researchers and
-                      products.
-                    </em>
-                  </p>
-                  <p
-                    className="font13 orangeColor textRight"
-                    style={{ marginTop: "10px" }}>
-                    Our Vission
-                  </p>
-                </div>
-              </QuoteWrapper>
-              <DotsWrapper>
-                <Dots />
-              </DotsWrapper>
-            </ImageWrapper>
-            <GreyDiv className="lightBg"></GreyDiv>
-          </RightSide2>
+          {/* <Box className="sm:block hidden">
+            <RightSide2>
+              <ImageWrapper>
+                <Img
+                  className="radius8"
+                  src={HeaderImage}
+                  alt="office"
+                  style={{ zIndex: 9, width: "70%" }}
+                />
+                <QuoteWrapper className="flexCenter darkBg radius8">
+                  <QuotesWrapper>
+                    <QuotesIcon />
+                  </QuotesWrapper>
+                  <div>
+                    <p className="font15 whiteColor">
+                      <em>
+                        To be a prestigious international university that
+                        champions innovation, self -reliance, and the
+                        development of culturally savvy and disciplined
+                        researchers and products.
+                      </em>
+                    </p>
+                    <p
+                      className="font13 orangeColor textRight"
+                      style={{ marginTop: "10px" }}>
+                      Our Vission
+                    </p>
+                  </div>
+                </QuoteWrapper>
+                <DotsWrapper>
+                  <Dots />
+                </DotsWrapper>
+              </ImageWrapper>
+              <GreyDiv className="lightBg"></GreyDiv>
+            </RightSide2>
+          </Box> */}
         </Wrapper>
       </Box>
     </>
@@ -74,7 +76,6 @@ const LeftSide = styled.div`
     width: 100%;
     order: 2;
     margin: 50px 0;
-    text-align: center;
   }
   @media (max-width: 560px) {
     margin: 80px 0 50px 0;
@@ -97,7 +98,6 @@ const LeftSide2 = styled.div`
     width: 100%;
     order: 2;
     margin: 50px 0;
-    text-align: center;
   }
   @media (max-width: 560px) {
     margin: 80px 0 50px 0;

@@ -14,13 +14,13 @@ import RegisterForm from "../components/authentication/RegisterForm";
 export default function Register() {
   return (
     <>
-      <TopNavbar path="" />
-      <Box className="mt-10">
+      <TopNavbar path="register" />
+      <Box className="">
         <Wrapper id="home" className="container flexSpaceCenter">
           <LeftSide2 className="flexCenter">
             <RegisterForm />
           </LeftSide2>
-          <RightSide2>
+          {/* <RightSide2>
             <ImageWrapper>
               <Img
                 className="radius8"
@@ -53,7 +53,7 @@ export default function Register() {
               </DotsWrapper>
             </ImageWrapper>
             <GreyDiv className="lightBg"></GreyDiv>
-          </RightSide2>
+          </RightSide2> */}
         </Wrapper>
       </Box>
     </>

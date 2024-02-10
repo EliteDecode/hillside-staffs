@@ -22,27 +22,39 @@ const MainScreen = () => {
             seamless entry to designated areas, and enhanced convenience for
             your daily tasks.
           </Card.Text>
-          {user?.data?.IdCardStatus == 1 ? (
-            <Button
-              variant="contained"
-              disableElevation
-              disabled
-              sx={{
-                background: "#5e0001",
-                fontSize: "10px",
-              }}>
-              Successfully Applied
-            </Button>
-          ) : (
-            <Link to="id_application">
+          <Box className="space-x-2">
+            {user?.data?.IdCardStatus == 1 ? (
               <Button
                 variant="contained"
                 disableElevation
-                sx={{ background: "#5e0001", fontSize: "10px" }}>
-                Apply Here
+                disabled
+                sx={{
+                  background: "#5e0001",
+                  fontSize: "10px",
+                }}>
+                Successfully Applied
               </Button>
-            </Link>
-          )}
+            ) : (
+              <Link to="id_application">
+                <Button
+                  variant="contained"
+                  disableElevation
+                  sx={{ background: "#5e0001", fontSize: "10px" }}>
+                  Apply Here
+                </Button>
+              </Link>
+            )}
+            {user?.data?.Approved == 1 && (
+              <Link to="id_application">
+                <Button
+                  variant="contained"
+                  disableElevation
+                  sx={{ background: "#5e0001", fontSize: "10px" }}>
+                  View ID Card
+                </Button>
+              </Link>
+            )}
+          </Box>
         </Card.Body>
       </Card>
 

@@ -10,7 +10,7 @@ export default function Sidebar({ sidebarOpen, toggleSidebar }) {
     <Wrapper className="animate" sidebarOpen={sidebarOpen}>
       <SidebarHeader className="flexSpaceCenter">
         <div className="flexNullCenter">
-          <img src={LogoIcon} className="sm:w-[23%] w-[20%] sm:mt-0 mt-5" />
+          <img src={LogoIcon} className="sm:w-[23%] w-[20%] " />
         </div>
         <CloseBtn
           onClick={() => toggleSidebar(!sidebarOpen)}
