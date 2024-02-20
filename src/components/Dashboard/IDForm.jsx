@@ -11,16 +11,18 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+import imglyRemoveBackground from "@imgly/background-removal";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import Card from "react-bootstrap/Card";
 import { useDispatch, useSelector } from "react-redux";
-import { reset, update } from "../../features/auth/authSlice";
+import { removeBg, reset, update } from "../../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import html2canvas from "html2canvas";
 import JsPDF from "jspdf";
 import domtoimage from "dom-to-image";
+import SignaturePad from "react-signature-canvas";
 const validationSchema = Yup.object().shape({
   phonenumber: Yup.string().required("Phone Number is required"),
   rolename: Yup.string().required("Role Name is required"),
@@ -38,6 +40,20 @@ const IDForm = () => {
   const { user, isError, isSuccess, message } = useSelector(
     (state) => state.auth
   );
+  const [trimmedDataURL, setTrimmedDataURL] = useState(null);
+  const sigPad = useRef();
+
+  const clear = () => {
+    sigPad.current.clear();
+  };
+
+  const trim = () => {
+    const trimmedData = sigPad.current
+      .getTrimmedCanvas()
+      .toDataURL("image/png");
+    setTrimmedDataURL(trimmedData);
+    sendToAPI(trimmedData); // Sending trimmedDataURL to API
+  };
 
   const qrCode = `https://online.hust.edu.ng/OESWebApp/images/code/${user?.data?.qrcode}`;
   const img = `https://backend.hust.edu.ng/hust/api/v1/uploads/staffProfile/${user?.data?.profilePicture}`;
@@ -81,6 +97,10 @@ const IDForm = () => {
     });
   };
 
+  const handlePreview = async () => {
+    setConfirm(!confirm);
+  };
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -111,6 +131,7 @@ const IDForm = () => {
       { columnName: "rolename", newValue: values.rolename },
       { columnName: "IdCardStatus", newValue: 1 },
       { columnName: "staffId", newValue: "Not Set" },
+      { columnName: "signature", newValue: JSON.stringify(trimmedDataURL) },
     ].filter((update) => update.newValue !== "");
 
     formData.append("updates", JSON.stringify(updates));
@@ -148,6 +169,11 @@ const IDForm = () => {
 
     dispatch(reset());
   }, [isError, isSuccess, dispatch, message]);
+
+  const sendToAPI = (trimmedDataURL) => {
+    // Replace this with your API call to send the trimmedDataURL to the server
+    console.log("Sending to API:", trimmedDataURL);
+  };
 
   const IdCardDetails = [
     {
@@ -188,6 +214,8 @@ const IDForm = () => {
     },
   ];
 
+  console.log(formik.values);
+
   return (
     <>
       <Box className="mt-3 sm:mb-48 mb-48">
@@ -214,7 +242,29 @@ const IDForm = () => {
                             value={formik.values.rolename}
                             onBlur={formik.handleBlur}
                             onChange={formik.handleChange}>
-                            <MenuItem value="HR">Non-Academic Staff</MenuItem>
+                            <MenuItem value="University-Administrator">
+                              Presidency
+                            </MenuItem>
+                            <MenuItem value="Administrator">Registry</MenuItem>
+                            <MenuItem value="University-Librarian">
+                              Library & Research
+                            </MenuItem>
+                            <MenuItem value="HR">Human Resource(HR)</MenuItem>
+                            <MenuItem value="University-Finance">
+                              Bursary
+                            </MenuItem>
+                            <MenuItem value="University-Medicals">
+                              Medical Services
+                            </MenuItem>
+                            <MenuItem value="University-Student-Development">
+                              Student Development
+                            </MenuItem>
+                            <MenuItem value="University-Security">
+                              Security
+                            </MenuItem>
+                            <MenuItem value="Non-Academic">
+                              Others (Non-Academic)
+                            </MenuItem>
                             <MenuItem value="Lecturer">Academic Staff</MenuItem>
                           </Select>
                         </FormControl>
@@ -360,8 +410,66 @@ const IDForm = () => {
                           </Typography>
                         )}
                       </Grid>
+                      <Grid item xs={12}>
+                        <div className="w-full">
+                          <Typography>
+                            <span className="text-red-500">(*)</span> Please
+                            draw your signature on the provided gray space below
+                          </Typography>
+                          {!trimmedDataURL ? (
+                            <div className="w-[100%] h-[40vh] m-auto bg-gray-100">
+                              <SignaturePad
+                                canvasProps={{
+                                  style: {
+                                    width: "100%",
+                                    height: " 100%",
+                                  },
+                                }}
+                                ref={sigPad}
+                              />
+                            </div>
+                          ) : (
+                            <img
+                              className="w-[20%]"
+                              src={trimmedDataURL}
+                              alt="Trimmed Signature"
+                            />
+                          )}
+                          <div className=" space-x-2">
+                            {trimmedDataURL ? (
+                              <Button
+                                variant="contained"
+                                color="info"
+                                onClick={() => setTrimmedDataURL(null)}
+                                component="span"
+                                className="mt-2 w-[25%]">
+                                Edit
+                              </Button>
+                            ) : (
+                              <>
+                                <Button
+                                  variant="contained"
+                                  color="error"
+                                  onClick={clear}
+                                  component="span"
+                                  className="mt-2 w-[25%]">
+                                  Clear
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  color="success"
+                                  onClick={trim}
+                                  component="span"
+                                  className="mt-2 w-[25%]">
+                                  Save
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </Grid>
 
-                      <Grid item xs={6}>
+                      <Grid item xs={12}>
                         <input
                           accept="image/*"
                           style={{ display: "none" }}
@@ -379,15 +487,24 @@ const IDForm = () => {
                             );
                           }}
                         />
+
                         <label htmlFor="profilePicture">
                           <Button
                             variant="outlined"
                             color="primary"
                             component="span"
-                            className="mt-2">
+                            className="mt-2 w-full">
                             Upload Profile Picture
                           </Button>
                         </label>
+                        {profile && (
+                          <img
+                            src={profile}
+                            alt=""
+                            className="h-[120px] w-[110px] mt-1"
+                          />
+                        )}
+
                         {formik.errors.profilePicture &&
                           formik.touched.profilePicture && (
                             <Typography
@@ -405,18 +522,18 @@ const IDForm = () => {
 
                       {formik.values.phonenumber &&
                         formik.values.profilePicture &&
+                        trimmedDataURL &&
                         formik.values.rolename &&
                         formik.values.sex &&
                         formik.values.year && (
                           <>
                             <Grid item xs={12} md={12}>
                               <Button
-                                onClick={() => setConfirm(!confirm)}
+                                onClick={handlePreview}
                                 variant="contained"
-                                color="primary"
-                                className="mt-4"
-                                size="medium"
-                                disableElevation
+                                color="success"
+                                className="mt-4 w-full"
+                                size="large"
                                 sx={{ fontSize: "12px" }}>
                                 Next
                               </Button>
@@ -512,7 +629,7 @@ const IDForm = () => {
                       xs={12}
                       className="flex items-center justify-center bg-white">
                       <div ref={pdfRef}>
-                        <div className="flex items-center space-x-2 justify-center">
+                        <div className="flex items-center  sm:space-x-2 space-x-0 justify-center">
                           <div className="flex items-center justify-center relative">
                             <div className="h-[450px] w-[270px] border">
                               {/* Header */}
@@ -541,14 +658,23 @@ const IDForm = () => {
                               {/* End of Header */}
 
                               <div className="flex  items-center justify-between">
-                                <div className="p-3">
-                                  <img
-                                    src={profile}
-                                    className="h-[120px] w-[110px]"
+                                <div className="p-3 bg-white">
+                                  <div
                                     style={{
-                                      border: "2px solid #5e0001",
-                                    }}
-                                  />
+                                      backgroundColor: "#5e0001", // Background color that you want to remove
+                                      mixBlendMode: "multiply", // Multiply blend mode to remove background
+                                      border: "2px solid #5e0001", // Border color
+                                      display: "inline-block", // Ensures the background color is applied properly
+                                    }}>
+                                    <img
+                                      src={profile}
+                                      className="h-[120px] w-[110px]"
+                                      alt="Profile Picture"
+                                      style={{
+                                        display: "block", // Ensures the image fills the container properly
+                                      }}
+                                    />
+                                  </div>
                                 </div>
 
                                 <div className="mt-5">
@@ -605,15 +731,17 @@ const IDForm = () => {
                                     </h6>
                                   </div>
                                   <div className="mt-1 absolute -bottom-2">
-                                    <h6 className=" underline font-semibold text-[14px]">
-                                      Hgbuo
-                                    </h6>
-                                    <h5 className="-mt-2 text-[12px] text-[#5e0001]">
+                                    <img
+                                      src={trimmedDataURL}
+                                      alt=""
+                                      className="w-[18%]"
+                                    />
+                                    <h5 className=" text-[12px] text-[#5e0001]">
                                       Staff Signature
                                     </h5>
                                   </div>
                                 </div>
-                                <div className="relative bg-[#5e0002c1]    h-[225px] w-[40px]">
+                                <div className="relative bg-[#5e0002c1]    h-[215px] w-[40px]">
                                   <span className="rotate font-bold text-white">
                                     {formik.values.position}
                                   </span>
@@ -654,7 +782,8 @@ const IDForm = () => {
                                   institution.
                                 </h3>
                                 <h3 className="text-[12px] font-semibold">
-                                  Visit us at www.hust.edu.ng
+                                  Visit us at www.hust.edu.ng or call
+                                  (+)234-814-064-1124
                                 </h3>
                               </div>
                               <div className="mt-3">
@@ -669,25 +798,25 @@ const IDForm = () => {
                                   ciences/Security
                                 </p>
                                 <p className="font-semibold text-[13px] -mt-4">
-                                  <span className="text-[#5e0001] font-black">
+                                  <span className="text-[#b75927] font-black">
                                     T
                                   </span>
                                   echnology/Engineering
                                 </p>
                                 <p className="font-semibold text-[13px] -mt-4">
-                                  <span className="font-black text-[#75a2d6]">
+                                  <span className="font-black text-[#4172b4]">
                                     E
                                   </span>
                                   ducation/Environment
                                 </p>
                                 <p className="font-semibold text-[13px] -mt-4">
-                                  <span className="font-black text-[#677e56]">
+                                  <span className="font-black text-[#577e39]">
                                     A
                                   </span>
                                   gribusiness/Vocational
                                 </p>
                                 <p className="font-semibold text-[13px] -mt-4">
-                                  <span className="font-black text-[#c1203b]">
+                                  <span className="font-black text-[#91a7d6]">
                                     M
                                   </span>
                                   edicine/Management
@@ -791,7 +920,11 @@ const IDForm = () => {
                                     <h6> {user?.data?.bloodGroup}</h6>
                                   </div>
                                   <div className="sign">
-                                    <h6>.......................</h6>
+                                    <img
+                                      src={JSON.parse(user?.data?.signature)}
+                                      alt=""
+                                      className="w-[25%]"
+                                    />
                                     <h5>Staff Signature</h5>
                                   </div>
                                 </div>
@@ -844,32 +977,32 @@ const IDForm = () => {
                                   Disruptive Innovation Capacity Building in:
                                 </h3>
 
-                                <p className="font-semibold text-[13px] -mt-2 ">
+                                <p className="font-semibold text-[13px] ">
                                   <span className="font-black text-black">
                                     S
                                   </span>
                                   ciences/Security
                                 </p>
-                                <p className="font-semibold text-[13px] -mt-4 ">
-                                  <span className="text-[#5e0001] font-black">
+                                <p className="font-semibold text-[13px] -mt-4">
+                                  <span className="text-[#b75927] font-black">
                                     T
                                   </span>
                                   echnology/Engineering
                                 </p>
-                                <p className="font-semibold text-[13px] -mt-4 ">
-                                  <span className="font-black text-[#75a2d6]">
+                                <p className="font-semibold text-[13px] -mt-4">
+                                  <span className="font-black text-[#4172b4]">
                                     E
                                   </span>
                                   ducation/Environment
                                 </p>
-                                <p className="font-semibold text-[13px] -mt-4 ">
-                                  <span className="font-black text-[#677e56]">
+                                <p className="font-semibold text-[13px] -mt-4">
+                                  <span className="font-black text-[#577e39]">
                                     A
                                   </span>
                                   gribusiness/Vocational
                                 </p>
-                                <p className="font-semibold text-[13px] -mt-4 ">
-                                  <span className="font-black text-[#c1203b]">
+                                <p className="font-semibold text-[13px] -mt-4">
+                                  <span className="font-black text-[#91a7d6]">
                                     M
                                   </span>
                                   edicine/Management

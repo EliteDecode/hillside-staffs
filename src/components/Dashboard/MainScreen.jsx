@@ -44,7 +44,7 @@ const MainScreen = () => {
                 </Button>
               </Link>
             )}
-            {user?.data?.Approved == 1 && (
+            {user?.data?.Approved === 1 && (
               <Link to="id_application">
                 <Button
                   variant="contained"

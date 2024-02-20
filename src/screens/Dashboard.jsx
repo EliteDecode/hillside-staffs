@@ -26,10 +26,10 @@ const Dashboard = () => {
               <Grid item xs={12} sm={12} md={3}>
                 <UserCard />
               </Grid>
-              <Grid item xs={12} sm={12} md={6}>
+              <Grid item xs={12} sm={12} md={7}>
                 <MainScreen />
               </Grid>
-              <Grid item xs={12} sm={12} md={3}>
+              <Grid item xs={12} sm={12} md={2}>
                 <Slider />
               </Grid>
             </Grid>

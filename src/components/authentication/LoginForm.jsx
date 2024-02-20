@@ -151,6 +151,7 @@ const LoginForm = ({ redirectFrom }) => {
                   <Button
                     variant="contained"
                     disableElevation
+                    disabled
                     sx={{
                       bgcolor: "#5e0001",
                       textTransform: "none",

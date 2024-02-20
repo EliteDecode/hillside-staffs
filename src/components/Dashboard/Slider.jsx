@@ -48,7 +48,7 @@ const Slider = () => {
             }}>
             <Button
               variant="contained"
-              size="medium"
+              size="small"
               disableElevation
               sx={{
                 background: "#5e0001",
