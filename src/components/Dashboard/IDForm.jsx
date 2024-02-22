@@ -969,7 +969,8 @@ const IDForm = () => {
                                   institution.
                                 </h3>
                                 <h3 className="text-[12px] font-semibold ">
-                                  Visit us at www.hust.edu.ng
+                                  Visit us at www.hust.edu.ng or call
+                                  (+)234-814-064-1124
                                 </h3>
                               </div>
                               <div className="">
@@ -1021,7 +1022,11 @@ const IDForm = () => {
                               </div>
 
                               <div className="sign2">
-                                <h6>.......................</h6>
+                                <img
+                                  src={require("../../assets/img/vc_sign.png")}
+                                  className="w-[35%]"
+                                  alt=""
+                                />
                                 <h5>President/Vice-Chancellor</h5>
                               </div>
                             </div>
