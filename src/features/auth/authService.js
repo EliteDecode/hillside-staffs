@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const API_URL = "https://backend.hust.edu.ng/hust/api/v1/staff";
+// const API_URL = "https://backend.hust.edu.ng/hust/api/v1/staff";
 
-// export const API_URL = "http://localhost:5000/hust/api/v1/staff";
+export const API_URL = "http://localhost:5000/hust/api/v1/staff";
 
 //Register user
 const register = async (userData) => {

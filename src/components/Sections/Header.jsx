@@ -36,7 +36,7 @@ export default function Header() {
             </HeaderP>
             <Link to="/login" style={{ textAlign: "left" }}>
               <BtnWrapper>
-                <FullButton title="Get Started" />
+                <FullButton title="LOGIN" />
               </BtnWrapper>
             </Link>
           </div>

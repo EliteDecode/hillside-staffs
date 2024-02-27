@@ -18,7 +18,6 @@ import Card from "react-bootstrap/Card";
 import { useDispatch, useSelector } from "react-redux";
 import { removeBg, reset, update } from "../../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import html2canvas from "html2canvas";
 import JsPDF from "jspdf";
 import domtoimage from "dom-to-image";
@@ -66,11 +65,12 @@ const IDForm = () => {
 
   const downloadPDF = () => {
     const node = pdfRef.current;
+    setLoader(true);
 
     var options = {
       quality: 0.99,
-      width: 700,
-      height: 700,
+      width: 600,
+      height: 1000,
     };
 
     domtoimage.toPng(node, options).then(function (imgData) {
@@ -93,6 +93,8 @@ const IDForm = () => {
 
         pdf.addImage(imgData, "JPEG", imgX, imgY, newImgWidth, newImgHeight);
         pdf.save("id.pdf");
+        setLoader(false);
+        toast.success("Id card downloaded successfully");
       };
     });
   };
@@ -260,7 +262,7 @@ const IDForm = () => {
                               Student Development
                             </MenuItem>
                             <MenuItem value="University-Security">
-                              Security
+                              Security and Safety
                             </MenuItem>
                             <MenuItem value="Non-Academic">
                               Others (Non-Academic)
@@ -853,199 +855,204 @@ const IDForm = () => {
             </Card.Body>
           </Card>
         ) : (
-          <Card>
-            <Card.Header></Card.Header>
-            <Card.Body>
-              <Grid container>
-                <Grid item sm={12} md={12} className=""></Grid>
-                <Grid item sm={12} md={12} className="bg-white">
-                  <div
-                    id="idpdf"
-                    ref={pdfRef}
-                    className="bg-white flex items-center justify-center mb-4">
-                    <div className=" space-x-4">
-                      <Grid container spacing={2}>
-                        <Grid item sm={12} md={6} className="bg-white">
-                          <div className="idcard border">
-                            <div className="faintLogo">
-                              <img
-                                src={require("../../assets/img/faintLogo.png")}
-                                alt=""
-                              />
-                            </div>
-                            <div className="front">
-                              <div className="header">
-                                <div className="logo">
-                                  <img
-                                    src={require("../../assets/img/logo.png")}
-                                    alt=""
-                                  />
-                                </div>
-                                <div className="text">
-                                  <h1>
-                                    HILLSIDE UNIVERSITY OF SCIENCE & TECHNOLOGY
-                                  </h1>
-                                  <h6>Oke-Mesi, Ekiti, Nigeria.</h6>
-                                </div>
-                              </div>
-                              <div className="middle">
-                                <div className="img">
-                                  <img src={img} alt="" />
-                                </div>
-                                <div className="staff">
-                                  <p>STAFF</p>
-                                </div>
-                              </div>
-                              <div className="details">
-                                <div className="right-details -mt-5">
-                                  <div className="names surname ">
-                                    <h5>SURNAME</h5>
-                                    <h6>{user?.data?.lastname}</h6>
-                                  </div>
-                                  <div className="names">
-                                    <h5>OTHER NAMES</h5>
-                                    <h6>{user?.data?.firstname}</h6>
-                                  </div>
-
-                                  <div className="namess">
-                                    <h5>ID NUMBER</h5>
-                                    <h6>{user?.data?.staffId}</h6>
-                                  </div>
-                                  <div className="namess">
-                                    <h5>ISSUED DATE</h5>
-                                    <h6> {user?.data?.createdAt}</h6>
-                                  </div>
-                                  <div className="namess">
-                                    <h5>BLOOD GROUP</h5>
-                                    <h6> {user?.data?.bloodGroup}</h6>
-                                  </div>
-                                  <div className="sign">
-                                    <img
-                                      src={JSON.parse(user?.data?.signature)}
-                                      alt=""
-                                      className="w-[25%]"
-                                    />
-                                    <h5>Staff Signature</h5>
-                                  </div>
-                                </div>
-                                <div className="left-details">
-                                  <span className="rotate">
-                                    {user?.data?.currentPosition.toUpperCase()}
-                                  </span>
-                                  <img
-                                    src={require("../../assets/img/leaf.png")}
-                                    alt=""
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </Grid>
-                        {/* Back of card */}
-                        <Grid item sm={12} md={6} className="bg-white">
-                          <div className="flex items-center justify-center relative">
-                            <div className="h-[470px] w-[280px] border p-3">
-                              {/* Header */}
-                              <div className="absolute h-[450px] w-[270px] top-[100px]">
+          <>
+            <Card>
+              <Card.Header></Card.Header>
+              <Card.Body>
+                <Grid container>
+                  <Grid item sm={12} md={12} className=""></Grid>
+                  <Grid item sm={12} md={12} className="bg-white">
+                    <div
+                      id="idpdf"
+                      ref={pdfRef}
+                      className="bg-white flex items-center justify-center mb-4">
+                      <div className=" space-x-4">
+                        <Grid container spacing={2}>
+                          <Grid item sm={12} md={6} className="bg-white">
+                            <div className="idcard border">
+                              <div className="faintLogo">
                                 <img
                                   src={require("../../assets/img/faintLogo.png")}
                                   alt=""
                                 />
                               </div>
+                              <div className="front">
+                                <div className="header">
+                                  <div className="logo">
+                                    <img
+                                      src={require("../../assets/img/logo.png")}
+                                      alt=""
+                                    />
+                                  </div>
+                                  <div className="text">
+                                    <h1>
+                                      HILLSIDE UNIVERSITY OF SCIENCE &
+                                      TECHNOLOGY
+                                    </h1>
+                                    <h6>Oke-Mesi, Ekiti, Nigeria.</h6>
+                                  </div>
+                                </div>
+                                <div className="middle">
+                                  <div className="img">
+                                    <img
+                                      src={require("../../assets/img/passport.jpg")}
+                                      alt=""
+                                    />
+                                  </div>
+                                  <div className="staff">
+                                    <p>STAFF</p>
+                                  </div>
+                                </div>
+                                <div className="details">
+                                  <div className="right-details -mt-5">
+                                    <div className="names surname ">
+                                      <h5>SURNAME</h5>
+                                      <h6>{user?.data?.lastname}</h6>
+                                    </div>
+                                    <div className="names">
+                                      <h5>OTHER NAMES</h5>
+                                      <h6>{user?.data?.firstname}</h6>
+                                    </div>
 
-                              <div>
-                                <h3 className="text-[12px] font-semibold">
-                                  This card is the property of
-                                </h3>
-                                <h3 className="text-[15px] text-[#5e0001] font-bold ">
-                                  HILLSIDE UNIVERSITY <br /> OF SCIENCE &
-                                  TECHNOLOGY <br />
-                                  <span className="font-semibold text-gray-900 text-[15px]">
-                                    Oke-Mesi, Ekiti, Nigeria.
-                                  </span>
-                                </h3>
-                                <h3 className="text-[12px]  font-semibold">
-                                  If found, please return to the above
-                                  institution.
-                                </h3>
-                                <h3 className="text-[12px] font-semibold ">
-                                  Visit us at www.hust.edu.ng or call
-                                  (+)234-814-064-1124
-                                </h3>
-                              </div>
-                              <div className="">
-                                <h3 className="text-[12px] font-bold mt-4">
-                                  Disruptive Innovation Capacity Building in:
-                                </h3>
-
-                                <p className="font-semibold text-[13px] ">
-                                  <span className="font-black text-black">
-                                    S
-                                  </span>
-                                  ciences/Security
-                                </p>
-                                <p className="font-semibold text-[13px] -mt-4">
-                                  <span className="text-[#b75927] font-black">
-                                    T
-                                  </span>
-                                  echnology/Engineering
-                                </p>
-                                <p className="font-semibold text-[13px] -mt-4">
-                                  <span className="font-black text-[#4172b4]">
-                                    E
-                                  </span>
-                                  ducation/Environment
-                                </p>
-                                <p className="font-semibold text-[13px] -mt-4">
-                                  <span className="font-black text-[#577e39]">
-                                    A
-                                  </span>
-                                  gribusiness/Vocational
-                                </p>
-                                <p className="font-semibold text-[13px] -mt-4">
-                                  <span className="font-black text-[#91a7d6]">
-                                    M
-                                  </span>
-                                  edicine/Management
-                                </p>
-                              </div>
-
-                              <div className="flex justify-between items-center w-[100%] mt-2">
-                                <div></div>
-                                <div className="border p-2 bg-[#5e0001] w-[45%] rounded-md">
-                                  <img
-                                    src={qrCode}
-                                    alt=""
-                                    className="w-[100%]"
-                                  />
+                                    <div className="namess">
+                                      <h5>ID NUMBER</h5>
+                                      <h6>{user?.data?.staffId}</h6>
+                                    </div>
+                                    <div className="namess">
+                                      <h5>ISSUED DATE</h5>
+                                      <h6> {user?.data?.createdAt}</h6>
+                                    </div>
+                                    <div className="namess">
+                                      <h5>BLOOD GROUP</h5>
+                                      <h6> {user?.data?.bloodGroup}</h6>
+                                    </div>
+                                    <div className="sign">
+                                      <img
+                                        src={JSON.parse(user?.data?.signature)}
+                                        alt=""
+                                        className="w-[25%]"
+                                      />
+                                      <h5>Staff Signature</h5>
+                                    </div>
+                                  </div>
+                                  <div className="left-details">
+                                    <span className="rotate">
+                                      {user?.data?.currentPosition.toUpperCase()}
+                                    </span>
+                                    <img
+                                      src={require("../../assets/img/leaf.png")}
+                                      alt=""
+                                    />
+                                  </div>
                                 </div>
                               </div>
+                            </div>
+                          </Grid>
+                          {/* Back of card */}
+                          <Grid item sm={12} md={6} className="bg-white">
+                            <div className="flex items-center flex-wrap justify-center relative">
+                              <div className="h-[470px] w-[280px] border p-3">
+                                {/* Header */}
+                                <div className="absolute h-[450px] w-[270px] top-[100px]">
+                                  <img
+                                    src={require("../../assets/img/faintLogo.png")}
+                                    alt=""
+                                  />
+                                </div>
 
-                              <div className="sign2">
-                                <img
-                                  src={require("../../assets/img/vc_sign.png")}
-                                  className="w-[35%]"
-                                  alt=""
-                                />
-                                <h5>President/Vice-Chancellor</h5>
+                                <div>
+                                  <h3 className="text-[12px] font-semibold">
+                                    This card is the property of
+                                  </h3>
+                                  <h3 className="text-[15px] text-[#5e0001] font-bold ">
+                                    HILLSIDE UNIVERSITY <br /> OF SCIENCE &
+                                    TECHNOLOGY <br />
+                                    <span className="font-semibold text-gray-900 text-[15px]">
+                                      Oke-Mesi, Ekiti, Nigeria.
+                                    </span>
+                                  </h3>
+                                  <h3 className="text-[12px]  font-semibold">
+                                    If found, please return to the above
+                                    institution.
+                                  </h3>
+                                  <h3 className="text-[12px] font-semibold ">
+                                    Visit us at www.hust.edu.ng or call
+                                    (+)234-814-064-1124
+                                  </h3>
+                                </div>
+                                <div className="">
+                                  <h3 className="text-[12px] font-bold mt-4">
+                                    Disruptive Innovation Capacity Building in:
+                                  </h3>
+
+                                  <p className="font-semibold text-[13px] ">
+                                    <span className="font-black text-black">
+                                      S
+                                    </span>
+                                    ciences/Security
+                                  </p>
+                                  <p className="font-semibold text-[13px] -mt-4">
+                                    <span className="text-[#b75927] font-black">
+                                      T
+                                    </span>
+                                    echnology/Engineering
+                                  </p>
+                                  <p className="font-semibold text-[13px] -mt-4">
+                                    <span className="font-black text-[#4172b4]">
+                                      E
+                                    </span>
+                                    ducation/Environment
+                                  </p>
+                                  <p className="font-semibold text-[13px] -mt-4">
+                                    <span className="font-black text-[#577e39]">
+                                      A
+                                    </span>
+                                    gribusiness/Vocational
+                                  </p>
+                                  <p className="font-semibold text-[13px] -mt-4">
+                                    <span className="font-black text-[#91a7d6]">
+                                      M
+                                    </span>
+                                    edicine/Management
+                                  </p>
+                                </div>
+
+                                <div className="flex justify-between items-center w-[100%] mt-2">
+                                  <div></div>
+                                  <div className="border p-2 bg-[#5e0001] w-[45%] rounded-md">
+                                    <img
+                                      src={qrCode}
+                                      alt=""
+                                      className="w-[100%]"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="sign2">
+                                  <img
+                                    src={require("../../assets/img/vc_sign.png")}
+                                    className="w-[35%]"
+                                    alt=""
+                                  />
+                                  <h5>President/Vice-Chancellor</h5>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          </Grid>
                         </Grid>
-                      </Grid>
+                      </div>
                     </div>
-                  </div>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </Card.Body>
-            <Card.Footer>
-              <button
-                className="py-2 px-6 bg-[#5e0001] text-white rounded-md"
-                onClick={downloadPDF}>
-                {loader ? "Please wait" : "Download ID Card"}
-              </button>
-            </Card.Footer>
-          </Card>
+              </Card.Body>
+            </Card>
+            <button
+              className="py-2 m-3 px-6 bg-[#5e0001] text-white rounded-md"
+              disabled={loader}
+              onClick={downloadPDF}>
+              {loader ? "Please wait..." : "Download ID Card"}
+            </button>
+          </>
         )}
       </Box>
     </>

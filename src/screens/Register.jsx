@@ -1,17 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
-// Components
-import FullButton from "../components/Buttons/FullButton";
-// Assets
-import HeaderImage from "../assets/img/login.jpg";
-import QuotesIcon from "../assets/svg/Quotes";
-import Dots from "../assets/svg/Dots";
+
 import { Box } from "@mui/material";
 import TopNavbar from "../components/Nav/TopNavbar";
-import LoginForm from "../components/authentication/LoginForm";
 import RegisterForm from "../components/authentication/RegisterForm";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const { user, isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, []);
   return (
     <>
       <TopNavbar path="register" />

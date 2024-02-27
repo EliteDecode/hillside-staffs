@@ -92,6 +92,7 @@ const UserCard = () => {
               }}>
               Phone: {user?.data?.phone || "Not set"}
             </Typography>
+
             <Typography
               sx={{
                 fontSize: "12px",
@@ -104,21 +105,7 @@ const UserCard = () => {
                   padding: "13px 12px",
                 },
               }}>
-              Program: {user?.data?.programs || "Not set"}
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: "12px",
-                background: "#f2f2f2",
-                padding: "8px 12px",
-                borderRadius: "5px",
-                margin: "10px 0px",
-                "@media (min-width: 0px) and (max-width: 575px)": {
-                  fontSize: "15px",
-                  padding: "13px 12px",
-                },
-              }}>
-              Role: {user?.data?.rolename || "Not set"}
+              Current Position: {user?.data?.currentPosition || "Not set"}
             </Typography>
           </Box>
         </Box>
