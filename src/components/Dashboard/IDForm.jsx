@@ -236,7 +236,9 @@ const IDForm = () => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <FormControl fullWidth size="medium" variant="outlined">
-                          <InputLabel htmlFor="rolename">Role</InputLabel>
+                          <InputLabel htmlFor="rolename">
+                            Departments/Units
+                          </InputLabel>
                           <Select
                             label="Role"
                             name="rolename"
@@ -894,10 +896,7 @@ const IDForm = () => {
                                 </div>
                                 <div className="middle">
                                   <div className="img">
-                                    <img
-                                      src={require("../../assets/img/passport.jpg")}
-                                      alt=""
-                                    />
+                                    <img src={img} alt="" />
                                   </div>
                                   <div className="staff">
                                     <p>STAFF</p>

@@ -14,6 +14,7 @@ import IdcardApplication from "./screens/IdCardApplication";
 import ProtectedRoutes from "./utils/ProtectedRoutes";
 import VerifyRegisteredUser from "./screens/VerifyRegisteredUser";
 import SendRequest from "./screens/SendRequest";
+import RegistrationComeplete from "./screens/RegistrationComplete";
 
 export default function App() {
   return (
@@ -32,6 +33,11 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route
+            path="/registration-complete"
+            element={<RegistrationComeplete />}
+          />
+
           <Route
             exact
             path="/verify/:userId/:uniqueString"

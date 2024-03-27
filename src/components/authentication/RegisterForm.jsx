@@ -7,7 +7,7 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { validateSchema } from "../../utils/Index";
 import { useSelector, useDispatch } from "react-redux";
@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { register, reset } from "../../features/auth/authSlice";
 const RegisterForm = ({ redirectFrom }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { user, isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.auth
@@ -53,12 +54,8 @@ const RegisterForm = ({ redirectFrom }) => {
       });
     }
 
-    if (isSuccess || user) {
-      toast.info(message.message, {
-        onClose: () => {
-          setSubmitting(false);
-        },
-      });
+    if (isSuccess) {
+      navigate("/registration-complete");
     }
 
     dispatch(reset());
@@ -69,7 +66,7 @@ const RegisterForm = ({ redirectFrom }) => {
       <Container>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12}>
-            {isSuccess || user ? (
+            {isSuccess ? (
               <Box className="bg-white rounded-md shadow-md text-center">
                 <Typography>{message && message.message}</Typography>
               </Box>

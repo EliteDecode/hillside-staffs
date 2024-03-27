@@ -33,7 +33,7 @@ const VerifyRegisteredUser = () => {
       });
     }
 
-    if (user) {
+    if (isSuccess) {
       toast.success("Congratulations you have successfully registered", {
         onClose: () => {
           dispatch(reset());
