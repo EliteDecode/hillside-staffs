@@ -72,8 +72,6 @@ const ViewID = () => {
     dispatch(singleStaff(user?.data?.id));
   }, []);
 
-  console.log(user);
-
   return (
     <>
       <Box className="mt-3 sm:mb-48 mb-48">

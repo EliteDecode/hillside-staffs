@@ -57,8 +57,6 @@ const IDForm = () => {
   const qrCode = `https://online.hust.edu.ng/OESWebApp/images/code/${user?.data?.qrcode}`;
   const img = `https://backend.hust.edu.ng/hust/api/v1/uploads/staffProfile/${user?.data?.profilePicture}`;
 
-  console.log(img);
-
   const [loader, setLoader] = useState(false);
 
   const pdfRef = useRef();
@@ -159,7 +157,11 @@ const IDForm = () => {
       setLoading(false);
     }
 
-    if (user && isSuccess) {
+    if (
+      user &&
+      isSuccess &&
+      message == "Congratulations profile updated successfully"
+    ) {
       toast.success("Congratulations your info has been updated", {
         onClose: () => {
           dispatch(reset());
